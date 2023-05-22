@@ -76,7 +76,7 @@ class UsersDao {
             $email = $body['email'];
             $ndoc = $body['ndoc'];
             $trial = $body['trial'];
-            $encryption_key = '02042eb47e50ab1e64844f91f3fa6c36a03de41720ece4746e40fc94172b3a46';
+            $encryption_key = getenv('encryption_key');
             
             $query->bindParam(':id', $id);
             $query->bindParam(':name', $name);

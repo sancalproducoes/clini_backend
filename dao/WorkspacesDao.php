@@ -17,6 +17,74 @@
             return $workspaces;
         }
 
+        function getCurrentUserByWorkspaceId($workspace_id){
+            $db = Flight::db();
+            $query = $db->prepare("
+            Select 
+                *
+            from users
+            where 
+            email = :email
+            AND
+            password = AES_ENCRYPT(:password,:encryption_key)
+            AND
+            workspace_id = :workspace_id
+            ");
+            $email = $_SERVER['PHP_AUTH_USER'];
+            $password = $_SERVER['PHP_AUTH_PW'];
+            $encryption_key = getenv('encryption_key');
+            $query->bindParam(':email', $email);
+            $query->bindParam(':password', $password);
+            $query->bindParam(':encryption_key', $encryption_key);
+            $query->bindParam(':workspace_id', $workspace_id);
+            $query->execute();
+            $workspaces = $query->fetchAll(PDO::FETCH_ASSOC);
+            if($workspaces){
+                for($i = 0; $i < count($workspaces); $i++){
+                    $workspaces[$i]['profile_pic'] = base64_encode($workspaces[$i]['profile_pic']);
+                    $workspaces[$i]['password'] = '';
+                }
+                return $workspaces;
+            }else{
+                return array("success"=> false, "message"=> "Nenhum usuário foi encontrado");;
+            }
+        }
+
+        function getUsersByWorkspaceId($workspace_id){
+            $db = Flight::db();
+            $query = $db->prepare("
+            Select 
+                *
+            from users
+            where 
+            workspace_id = :workspace_id
+            ");
+            $email = $_SERVER['PHP_AUTH_USER'];
+            $password = $_SERVER['PHP_AUTH_PW'];
+            $encryption_key = getenv('encryption_key');
+            $query->bindParam(':workspace_id', $workspace_id);
+            $query->execute();
+            $workspaces = $query->fetchAll(PDO::FETCH_ASSOC);
+            if($workspaces){
+                for($i = 0; $i < count($workspaces); $i++){
+                    $workspaces[$i]['profile_pic'] = base64_encode($workspaces[$i]['profile_pic']);
+                    $workspaces[$i]['password'] = '';
+                }
+                return $workspaces;
+            }else{
+                return array("success"=> false, "message"=> "Nenhum usuário foi encontrado");;
+            }
+        }
+
+        function getWorkspacesByName($name){
+            $db = Flight::db();
+            $query = $db->prepare("SELECT * FROM workspaces WHERE name = :name");
+            $query->bindParam(':name', $name);
+            $query->execute();
+            $workspaces = $query->fetchAll(PDO::FETCH_ASSOC);
+            return $workspaces;
+        }
+
         function getUsersWorkspacesById($id){
             $db = Flight::db();
             $query = $db->prepare("SELECT 
