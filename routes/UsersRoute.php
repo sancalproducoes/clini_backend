@@ -46,6 +46,12 @@
         Flight::json($users);
     });
 
+    Flight::route('GET /users/workspace/@id', function($id){
+        $usersDao = new UsersDao();
+        $users = $usersDao->getUsersByWorkspaceId($id);
+        Flight::json($users);
+    });
+
 
 
 

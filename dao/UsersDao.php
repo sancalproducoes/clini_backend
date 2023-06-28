@@ -16,6 +16,67 @@ class UsersDao {
         $users = $query->fetch(PDO::FETCH_ASSOC);
         return $users;
     }
+
+    function getCurrentUser($workspace_id){
+        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
+            Flight::halt(401);
+        }
+        $username = $_SERVER['PHP_AUTH_USER'];
+        $password = $_SERVER['PHP_AUTH_PW'];
+        $key = getenv('encryption_key');
+        // Consulta o banco de dados para verificar as credenciais do usuário
+        $db = Flight::db();
+        $query = $db->prepare
+        ("SELECT 
+        u.id,  
+        u.name,  
+        u.lastname,  
+        u.email,  
+        u.ndoc,  
+        u.trial,  
+        u.status,  
+        u.profile_pic,  
+        u.profile_pic_mime,  
+        u.creation_dt,  
+        CONCAT('[',GROUP_CONCAT(
+            r.name
+            ),']') as roles
+        FROM 
+            users as u 
+        INNER JOIN 
+            users_workspaces as uw 
+        ON 
+            uw.user_id = u.id 
+        INNER JOIN
+            user_roles as ur
+        ON
+            ur.user_id = u.id
+        INNER JOIN
+            roles as r
+        ON
+            r.id = ur.role_id
+        WHERE 
+            email = :username
+        AND 
+            password = AES_ENCRYPT(:password, :encryption_key) 
+        AND 
+            uw.workspace_id = :workspace_id
+        GROUP BY 
+            u.id");
+        $query->bindParam(':username', $username);
+        $query->bindParam(':password', $password);
+        $query->bindParam(':workspace_id', $workspace_id);
+        $query->bindParam(':encryption_key', $key);
+        $query->execute();
+        $users = $query->fetch(PDO::FETCH_ASSOC);
+        if($users){
+            $users['password'] = '';
+            $users['profile_pic'] = base64_encode($users['profile_pic']);
+            return $users;
+        }else{
+            return [];
+        }
+    }
     
     function getUserById($id){
         $db = Flight::db();
@@ -165,6 +226,10 @@ class UsersDao {
         return $data;
     }
     
+    function getUsersByWorkspaceId($workspace_id){
+        
+    }
+
 }
 
 ?>
