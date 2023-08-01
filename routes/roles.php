@@ -1,31 +1,28 @@
 <?php
 
 // Rota para criar uma nova função (role)
-Flight::route('POST /roles', function () {
+Flight::route('POST /role', function () {
     $db = Flight::db();
     $data = Flight::request()->data;
     $name = $data['name'];
     $description = $data['description'];
 
-    $stmt = $db->prepare("INSERT INTO cc_roles (name, description) VALUES (:name, :description)");
+    $stmt = $db->prepare("INSERT INTO cc_roles (name) VALUES (:name)");
     $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':description', $description);
     $stmt->execute();
 
     Flight::json(["message" => "Função criada com sucesso"]);
 });
 
 // Rota para atualizar uma função (role) existente
-Flight::route('PUT /roles/@id', function ($id) {
+Flight::route('PUT /role/id/@id', function ($id) {
     $db = Flight::db();
     $data = Flight::request()->data;
     $name = $data['name'];
-    $description = $data['description'];
 
-    $stmt = $db->prepare("UPDATE cc_roles SET name = :name, description = :description WHERE id = :id");
+    $stmt = $db->prepare("UPDATE cc_roles SET name = :name WHERE id = :id");
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':description', $description);
     $stmt->execute();
 
     Flight::json(["message" => "Função atualizada com sucesso"]);
@@ -40,7 +37,7 @@ Flight::route('GET /roles', function () {
 });
 
 // Rota para obter uma função (role) específica
-Flight::route('GET /roles/@id', function ($id) {
+Flight::route('GET /role/id/@id', function ($id) {
     $db = Flight::db();
     $stmt = $db->prepare("SELECT * FROM cc_roles WHERE id = :id");
     $stmt->bindParam(':id', $id);
@@ -55,7 +52,7 @@ Flight::route('GET /roles/@id', function ($id) {
 });
 
 // Rota para excluir uma função (role)
-Flight::route('DELETE /roles/@id', function ($id) {
+Flight::route('DELETE /role/id/@id', function ($id) {
     $db = Flight::db();
     $stmt = $db->prepare("DELETE FROM cc_roles WHERE id = :id");
     $stmt->bindParam(':id', $id);

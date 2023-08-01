@@ -39,10 +39,25 @@ Flight::route('GET /workspaces', function () {
 });
 
 // Rota para obter um espaço de trabalho (workspace) específico
-Flight::route('GET /workspaces/@id', function ($id) {
+Flight::route('GET /workspaces/id/@id', function ($id) {
     $db = Flight::db();
     $stmt = $db->prepare("SELECT * FROM cc_workspaces WHERE id = :id");
     $stmt->bindParam(':id', $id);
+    $stmt->execute();
+    $workspace = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($workspace) {
+        Flight::json($workspace);
+    } else {
+        Flight::halt(404, "Espaço de trabalho não encontrado");
+    }
+});
+
+// Rota para obter um espaço de trabalho (workspace) específico
+Flight::route('GET /workspaces/name/@name', function ($name) {
+    $db = Flight::db();
+    $stmt = $db->prepare("SELECT * FROM cc_workspaces WHERE slug = :name");
+    $stmt->bindParam(':name', $name);
     $stmt->execute();
     $workspace = $stmt->fetch(PDO::FETCH_ASSOC);
 

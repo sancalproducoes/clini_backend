@@ -11,7 +11,6 @@ Flight::register('db', 'PDO', array("mysql:host=$db_host;dbname=$db_name", $db_u
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 });
 
-
 // Função para verificar as credenciais de autenticação no banco de dados
 function authenticate($username, $password) {
     $db = Flight::db();
@@ -51,5 +50,25 @@ Flight::before('start', function () {
         exit();
     }
 });
+
+Flight::route('POST /login',function(){
+    $db = Flight::db();
+    $username = $_SERVER['PHP_AUTH_USER'];
+    $password = $_SERVER['PHP_AUTH_PW'];
+    $workspace_id =  Flight::request()->data->workspace_id;
+    echo json_encode($_POST);
+    $stmt = $db->prepare("SELECT * FROM cc_users INNER JOIN cc_user_workspaces ON workspace_id = :workspace_id WHERE email = :username AND password = md5(:password)");
+    $stmt->bindParam(':username', $username);
+    $stmt->bindParam(':password', $password);
+    $stmt->bindParam(':workspace_id', $workspace_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) {
+        Flight::json($result);
+    }else{
+        Flight::json(array('error' => 'Não foram encontrados registros.'));
+    }
+
+    })
 
 ?>
